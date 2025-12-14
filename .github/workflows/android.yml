@@ -1,0 +1,62 @@
+name: Android CI
+
+on:
+  push:
+    branches: ["main", "master"]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      CI: true
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: 8.7
+
+      - name: Prepare dependencies
+        run: gradle --no-daemon --stacktrace help
+
+      - name: Run static analysis
+        run: gradle --no-daemon ktlintCheck detekt lintDevDebug
+
+      - name: Run unit tests
+        run: gradle --no-daemon testDevDebugUnitTest
+
+      - name: Run instrumented tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          script: gradle --no-daemon connectedDevDebugAndroidTest
+
+      - name: Build release artifacts
+        run: gradle --no-daemon assembleProdRelease bundleProdRelease
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-apk
+          path: app/build/outputs/apk/prod/release/*.apk
+
+      - name: Upload AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-bundle
+          path: app/build/outputs/bundle/prodRelease/*.aab

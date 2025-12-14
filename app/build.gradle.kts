@@ -1,9 +1,31 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     kotlin("android")
     kotlin("plugin.serialization")
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
+}
+
+fun com.android.build.api.dsl.SigningConfig.applyFromProperties(
+    properties: Properties,
+    prefix: String
+) {
+    val storeFilePath = properties.getProperty("${prefix}StoreFile")
+    if (storeFilePath != null) {
+        storeFile = file(storeFilePath)
+        storePassword = properties.getProperty("${prefix}StorePassword")
+        keyAlias = properties.getProperty("${prefix}KeyAlias")
+        keyPassword = properties.getProperty("${prefix}KeyPassword")
+    }
+}
+
+val signingProperties = Properties().apply {
+    val signingFile = rootProject.file("signing.properties")
+    if (signingFile.exists()) {
+        load(signingFile.inputStream())
+    }
 }
 
 android {
@@ -16,13 +38,56 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         vectorDrawables.useSupportLibrary = true
+    }
+
+    signingConfigs {
+        create("dev") {
+            initWith(getByName("debug"))
+            applyFromProperties(signingProperties, "dev")
+        }
+        create("stage") {
+            initWith(getByName("debug"))
+            applyFromProperties(signingProperties, "stage")
+        }
+        create("prod") {
+            initWith(getByName("debug"))
+            applyFromProperties(signingProperties, "prod")
+        }
     }
 
     buildTypes {
         release {
             isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+    }
+
+    flavorDimensions += "environment"
+    productFlavors {
+        create("dev") {
+            dimension = "environment"
+            applicationIdSuffix = ".dev"
+            versionNameSuffix = "-dev"
+            resValue("string", "app_name", "Miro (Dev)")
+            signingConfig = signingConfigs.getByName("dev")
+        }
+        create("stage") {
+            dimension = "environment"
+            applicationIdSuffix = ".stage"
+            versionNameSuffix = "-stage"
+            resValue("string", "app_name", "Miro (Stage)")
+            signingConfig = signingConfigs.getByName("stage")
+        }
+        create("prod") {
+            dimension = "environment"
+            resValue("string", "app_name", "Miro")
+            signingConfig = signingConfigs.getByName("prod")
         }
     }
 
@@ -45,6 +110,17 @@ android {
 
     packaging {
         resources.excludes += "/META-INF/{AL2.0,LGPL2.1}"
+    }
+
+    lint {
+        abortOnError = true
+        warningsAsErrors = true
+        checkAllWarnings = true
+    }
+
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+        animationsDisabled = true
     }
 }
 
@@ -70,6 +146,15 @@ dependencies {
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
+
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test:runner:1.6.2")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
+    androidTestImplementation(platform("androidx.compose:compose-bom:2024.06.00"))
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")

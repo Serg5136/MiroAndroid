@@ -1,0 +1,15 @@
+# Sample signing configuration. Copy to signing.properties and replace with real values.
+devStoreFile=keystores/dev.keystore
+devStorePassword=devStorePassword
+devKeyAlias=devKeyAlias
+devKeyPassword=devKeyPassword
+
+stageStoreFile=keystores/stage.keystore
+stageStorePassword=stageStorePassword
+stageKeyAlias=stageKeyAlias
+stageKeyPassword=stageKeyPassword
+
+prodStoreFile=keystores/prod.keystore
+prodStorePassword=prodStorePassword
+prodKeyAlias=prodKeyAlias
+prodKeyPassword=prodKeyPassword
