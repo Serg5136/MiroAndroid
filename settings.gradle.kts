@@ -8,3 +8,4 @@ pluginManagement {
 
 rootProject.name = "MiroAndroid"
 include(":core")
+include(":data")
