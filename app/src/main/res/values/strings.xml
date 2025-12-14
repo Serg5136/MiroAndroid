@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Mini Miro</string>
+    <string name="board_list_title">Boards</string>
+    <string name="board_detail_title">Board details</string>
+    <string name="loading">Loading</string>
+    <string name="loading_description">Content is loading</string>
+    <string name="error_loading">Failed to load content</string>
+    <string name="retry">Retry</string>
+    <string name="last_updated">Last updated: %1$s</string>
+    <string name="refresh">Refresh</string>
+    <string name="board_item_cd">Open board %1$s</string>
+    <string name="back">Back</string>
+</resources>
