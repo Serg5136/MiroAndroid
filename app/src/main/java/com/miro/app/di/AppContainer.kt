@@ -4,8 +4,9 @@ import android.content.Context
 import com.miro.app.domain.usecase.GetBoardDetailUseCase
 import com.miro.app.domain.usecase.GetBoardsUseCase
 import com.miro.data.cache.DataStoreSettings
-import com.miro.data.cache.InMemoryRoomCache
+import com.miro.data.cache.RoomBoardCache
 import com.miro.data.cache.RoomCache
+import com.miro.data.cache.db.BoardDatabaseProvider
 import com.miro.data.repository.BoardRepository
 import com.miro.data.storage.ScopedStorageManager
 import kotlinx.coroutines.CoroutineScope
@@ -17,7 +18,8 @@ import kotlin.io.path.Path
 class AppContainer(context: Context) {
     private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    private val cache: RoomCache = InMemoryRoomCache()
+    private val databaseProvider = BoardDatabaseProvider(context)
+    private val cache: RoomCache = RoomBoardCache(databaseProvider.createDatabase().boardDao())
     private val settings = DataStoreSettings(
         name = "mini-miro",
         scope = appScope,
