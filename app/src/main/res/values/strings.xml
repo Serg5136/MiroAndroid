@@ -10,4 +10,11 @@
     <string name="refresh">Refresh</string>
     <string name="board_item_cd">Open board %1$s</string>
     <string name="back">Back</string>
+    <string name="notification_permission_title">Stay in sync with notifications</string>
+    <string name="notification_permission_message">Enable notifications to receive board updates and announcements.</string>
+    <string name="allow">Allow</string>
+    <string name="not_now">Not now</string>
+    <string name="push_channel_name">Mini Miro updates</string>
+    <string name="push_channel_description">Board changes, reminders, and system alerts.</string>
+    <string name="push_default_body">You have a new board update.</string>
 </resources>

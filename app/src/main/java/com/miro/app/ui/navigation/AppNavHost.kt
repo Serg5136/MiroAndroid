@@ -1,6 +1,7 @@
 package com.miro.app.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -28,6 +29,7 @@ fun AppNavHost(
     navController: NavHostController = rememberNavController(),
     boardListViewModelFactory: () -> ViewModelProvider.Factory,
     boardDetailViewModelFactory: (String) -> ViewModelProvider.Factory,
+    startBoardId: String? = null,
 ) {
     NavHost(
         navController = navController,
@@ -61,5 +63,10 @@ fun AppNavHost(
                 onBack = navController::popBackStack,
             )
         }
+    }
+
+    LaunchedEffect(startBoardId) {
+        val boardId = startBoardId ?: return@LaunchedEffect
+        navController.navigate("board_detail/$boardId")
     }
 }
