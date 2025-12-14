@@ -21,3 +21,20 @@
 - **Dialogs & clipboard:** Tkinter file/clipboard interactions (e.g., `filedialog`, copy/paste) require Android equivalents such as Storage Access Framework and ClipboardManager.【F:src/main.py†L1-L32】
 - **Background/periodic work:** Autosave currently does synchronous file writes; on Android this would map to background tasks (e.g., WorkManager) to persist board state without blocking the UI.【F:src/autosave.py†L17-L27】
 - **Networking/IPC:** The app is intentionally offline and does not use networking or external IPC, simplifying the port (no replacement network stack needed).【F:README.md†L3-L6】
+
+## Android architecture and modularization choices
+- **UI architecture:** Adopt **MVVM** with unidirectional data flow to keep UI state consistent across board canvas, toolbar, and dialogs. ViewModels expose `StateFlow`/`LiveData` for board data, selection state, and undo/redo availability while delegating commands to the domain layer.
+- **Dependency injection:** Use **Hilt** for scoped dependencies (application, activity, and viewmodel scopes). Hilt handles WorkManager integration via `@HiltWorker`, simplifies ViewModel creation for navigation destinations, and enables easy swapping of storage/serialization implementations for testing.
+- **Modules:**
+  - `:core`: UI theme resources, design system components, common utilities (logging, result wrappers), permission helpers, and base navigation/DI setup shared across modules.
+  - `:domain`: Pure Kotlin business logic—board entities, use cases (e.g., add card, connect nodes, autosave, export), validation, and undo/redo command abstractions. No Android dependencies.
+  - `:data`: Repositories for board persistence (JSON serialization, attachments storage), autosave scheduler contracts, and mappers between storage DTOs and domain models. Includes WorkManager enqueue helpers and optional native bridges for image export if required.
+  - `:app`: Android UI (Compose/Views), navigation graph, ViewModels, Hilt modules, and WorkManager workers. Depends on `:domain`, `:data`, and `:core`.
+  - **Native extensions (optional):** Separate modules like `:native:image` for image processing or export acceleration using NDK/RenderScript replacements when Pillow-specific features need parity.
+
+## Platform strategies
+- **Permissions:** Centralize permission prompts in `:core` via a composable/utility that wraps `ActivityResultContracts.RequestPermission(s)`. Storage (scoped/MediaStore) and notification permissions (for foreground service status) are requested contextually with rationale dialogs. ViewModels expose permission intents; UI triggers requests and reports results back, keeping business logic permission-free.
+- **Navigation:** Use **Jetpack Navigation** (preferably with the Compose integration) to structure main board, attachments picker, settings, and export flows. Graph destinations bind their ViewModels with Hilt; navigation arguments carry board IDs or attachment URIs. Deep links can restore specific boards from autosave files.
+- **Background tasks:**
+  - **WorkManager** schedules periodic autosave mirroring the Tkinter autosave cadence and one-off export or large attachment processing jobs. Workers use `setExpedited` when needed and share repositories injected by Hilt.
+  - **Foreground service** reserved for long-running export or bulk image import operations where user-visible progress is required. Service APIs surface `Notification` channels and report progress back to ViewModels via shared flows.
