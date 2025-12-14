@@ -28,6 +28,16 @@ class BoardRepository(
             .getOrDefault(cached)
     }
 
+    suspend fun getBoard(id: String, forceRefresh: Boolean = false): BoardPayload? = withContext(ioDispatcher) {
+        val cached = cache.getBoards().firstOrNull { it.id == id }
+        if (cached != null && !forceRefresh) return@withContext cached
+
+        return@withContext runCatching { api.getBoard(id) }
+            .onSuccess { cache.saveBoards(listOf(it)) }
+            .getOrNull()
+            ?: cached
+    }
+
     suspend fun pushBoards(localBoards: List<BoardPayload>) = withContext(ioDispatcher) {
         if (localBoards.isEmpty()) return@withContext
         cache.markPendingSync(localBoards)

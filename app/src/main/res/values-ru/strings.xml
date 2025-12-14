@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Мини Миро</string>
+    <string name="board_list_title">Доски</string>
+    <string name="board_detail_title">Детали доски</string>
+    <string name="loading">Загрузка</string>
+    <string name="loading_description">Содержимое загружается</string>
+    <string name="error_loading">Не удалось загрузить данные</string>
+    <string name="retry">Повторить</string>
+    <string name="last_updated">Обновлено: %1$s</string>
+    <string name="refresh">Обновить</string>
+    <string name="board_item_cd">Открыть доску %1$s</string>
+    <string name="back">Назад</string>
+</resources>
