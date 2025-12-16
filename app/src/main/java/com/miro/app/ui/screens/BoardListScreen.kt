@@ -80,7 +80,7 @@ fun BoardListScreen(
         ) { innerPadding ->
             Box(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
                 when {
-                    state.isLoading -> LoadingState()
+                    state.isLoading -> LoadingState(progress = state.loadingProgress)
                     state.errorMessage != null -> ErrorState(
                         message = state.errorMessage,
                         onRetry = onRefresh
@@ -133,7 +133,7 @@ private fun BoardList(
 }
 
 @Composable
-private fun LoadingState() {
+private fun LoadingState(progress: Float?) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -141,11 +141,22 @@ private fun LoadingState() {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        CircularProgressIndicator()
-        Text(
-            text = stringResource(R.string.loading),
-            modifier = Modifier.padding(top = 8.dp)
-        )
+        if (progress != null) {
+            androidx.compose.material3.LinearProgressIndicator(
+                progress = progress.coerceIn(0f, 1f),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp)
+            )
+            Text(
+                text = stringResource(id = R.string.loading) + " ${(progress * 100).toInt()}%",
+                modifier = Modifier.padding(top = 8.dp)
+            )
+        } else {
+            CircularProgressIndicator()
+            Text(
+                text = stringResource(R.string.loading),
+                modifier = Modifier.padding(top = 8.dp)
+            )
+        }
     }
 }
 

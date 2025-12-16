@@ -70,7 +70,10 @@ fun BoardDetailScreen(
             }
         ) { innerPadding ->
             when {
-                state.isLoading -> DetailLoading(modifier = Modifier.padding(innerPadding))
+                state.isLoading -> DetailLoading(
+                    progress = state.loadingProgress,
+                    modifier = Modifier.padding(innerPadding)
+                )
                 state.errorMessage != null -> DetailError(
                     message = state.errorMessage,
                     onRetry = onRetry,
@@ -105,7 +108,7 @@ private fun DetailContent(
 }
 
 @Composable
-private fun DetailLoading(modifier: Modifier = Modifier) {
+private fun DetailLoading(progress: Float?, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -113,8 +116,19 @@ private fun DetailLoading(modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        CircularProgressIndicator()
-        Text(text = stringResource(R.string.loading), modifier = Modifier.padding(top = 8.dp))
+        if (progress != null) {
+            androidx.compose.material3.LinearProgressIndicator(
+                progress = progress.coerceIn(0f, 1f),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp)
+            )
+            Text(
+                text = stringResource(R.string.loading) + " ${(progress * 100).toInt()}%",
+                modifier = Modifier.padding(top = 8.dp)
+            )
+        } else {
+            CircularProgressIndicator()
+            Text(text = stringResource(R.string.loading), modifier = Modifier.padding(top = 8.dp))
+        }
     }
 }
 

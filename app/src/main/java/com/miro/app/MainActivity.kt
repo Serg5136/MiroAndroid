@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
 import com.miro.app.analytics.AnalyticsLogger
 import com.miro.app.di.AppContainer
 import com.miro.app.ui.BoardDetailViewModel
@@ -49,14 +50,24 @@ class MainActivity : ComponentActivity() {
     private fun boardListViewModelFactory(): ViewModelProvider.Factory =
         object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return BoardListViewModel(container.getBoardsUseCase) as T
+                error("Unsupported constructor")
+            }
+
+            override fun <T : ViewModel> create(modelClass: Class<T>, extras: ViewModelProvider.Factory.CreationExtras): T {
+                val savedStateHandle = extras.createSavedStateHandle()
+                return BoardListViewModel(container.getBoardsUseCase, savedStateHandle) as T
             }
         }
 
     private fun boardDetailViewModelFactory(boardId: String): ViewModelProvider.Factory =
         object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return BoardDetailViewModel(boardId, container.getBoardDetailUseCase) as T
+                error("Unsupported constructor")
+            }
+
+            override fun <T : ViewModel> create(modelClass: Class<T>, extras: ViewModelProvider.Factory.CreationExtras): T {
+                val savedStateHandle = extras.createSavedStateHandle()
+                return BoardDetailViewModel(boardId, container.getBoardDetailUseCase, savedStateHandle) as T
             }
         }
 
