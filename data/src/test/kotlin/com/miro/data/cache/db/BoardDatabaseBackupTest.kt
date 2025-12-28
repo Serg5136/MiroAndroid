@@ -58,4 +58,32 @@ class BoardDatabaseBackupTest {
         assertEquals(1, restoredBoards.size)
         assertEquals("Backup Board", restoredBoards.first().name)
     }
+
+    @Test
+    fun backupAndRestoreIncludesPendingSync() = runBlocking {
+        val dao = requireNotNull(database).boardDao()
+        dao.upsertPendingSync(
+            listOf(
+                PendingSyncEntity(
+                    id = "99",
+                    name = "Queued Board",
+                    updatedAt = Instant.EPOCH.toString(),
+                    attachmentsVersion = 3,
+                    enqueuedAt = 1234L,
+                ),
+            ),
+        )
+
+        val tempDir = Files.createTempDirectory("board-db-backup-pending")
+        val backupFile = provider.backup(tempDir, requireNotNull(database))
+
+        database?.close()
+        context.deleteDatabase(BoardDatabase.DATABASE_NAME)
+        provider.restore(backupFile)
+        database = provider.createDatabase()
+
+        val pendingSync = requireNotNull(database).boardDao().loadPendingSync()
+        assertEquals(1, pendingSync.size)
+        assertEquals("Queued Board", pendingSync.first().name)
+    }
 }
