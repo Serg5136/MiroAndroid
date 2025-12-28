@@ -1,4 +1,5 @@
 import io.gitlab.arturbosch.detekt.extensions.DetektExtension
+import io.gitlab.arturbosch.detekt.extensions.DetektExtension
 import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 
 buildscript {
@@ -14,6 +15,8 @@ buildscript {
         classpath("com.android.tools.build:gradle:8.4.2")
         classpath("com.google.gms:google-services:4.4.2")
         classpath("com.google.firebase:firebase-crashlytics-gradle:3.0.2")
+        classpath("org.jlleitschuh.gradle:ktlint-gradle:11.6.1")
+        classpath("io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.23.6")
     }
 }
 
@@ -22,18 +25,6 @@ subprojects {
         mavenCentral()
         maven("https://cache-redirector.jetbrains.com/maven-central")
         google()
-    }
-
-    buildscript {
-        repositories {
-            mavenCentral()
-            google()
-            gradlePluginPortal()
-        }
-        dependencies {
-            classpath("org.jlleitschuh.gradle:ktlint-gradle:11.6.1")
-            classpath("io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.23.6")
-        }
     }
 
     apply(plugin = "org.jlleitschuh.gradle.ktlint")
